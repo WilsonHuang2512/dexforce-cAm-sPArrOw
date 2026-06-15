@@ -1,5 +1,6 @@
 import camera
 import numpy as np
+import cv2
 
 # 连接相机
 ip = '127.0.0.1'
@@ -49,13 +50,22 @@ if channels == 1:
 elif channels == 3:
     # 彩色相机
     print("检测到彩色相机，获取彩色亮度图...")
-    color_data = np.zeros((height, width, 3), dtype=np.uint8)
-    camera.DfGetColorBrightnessData(color_data, camera.XemaColor.Bgr)
     
-    # 保存彩色点云
-    camera.savePointcloudToPcd(pointcloud_data, color_data, channels, "color_cloud.pcd")
-    camera.savePointcloudToPly(pointcloud_data, color_data, channels, "color_cloud.ply")
-    print("彩色点云已保存")
+    # 获取BGR格式数据（用于点云）
+    color_data_bgr = np.zeros((height, width, 3), dtype=np.uint8)
+    camera.DfGetColorBrightnessData(color_data_bgr, camera.XemaColor.Bgr)
+    
+    # 使用NumPy高效转换BGR到RGB
+    color_data_rgb = color_data_bgr[:, :, ::-1].copy()  # Reverse channel order
+    
+    # 保存RGB图像
+    cv2.imwrite("bright.bmp", color_data_rgb)
+    print("彩色亮度图已保存（RGB格式）")
+    
+    # 使用BGR数据保存点云
+    camera.savePointcloudToPcd(pointcloud_data, color_data_bgr, channels, "color_cloud.pcd")
+    camera.savePointcloudToPly(pointcloud_data, color_data_bgr, channels, "color_cloud.ply")
+    print("彩色点云已保存（使用BGR数据）")
     
 else:
     print(f"警告: 不支持的通道数 {channels}")

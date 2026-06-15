@@ -1,0 +1,5 @@
+time interval:2
+model:1
+single:1023,2000
+hdr:[1023,1023],[2000,30000]
+repetition:3,1023,20000

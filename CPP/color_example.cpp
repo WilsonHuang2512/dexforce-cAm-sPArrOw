@@ -98,8 +98,20 @@ int main()
 				ret_code = p_camera->getColorBrightnessData(color_brightness_data, Color::Bgr);
 				if (0 == ret_code)
 				{
-					cv::Mat bright = cv::Mat(height, width, CV_8UC3, color_brightness_data);
+					// Create RGB version for OpenCV by swapping B and R channels
+					unsigned char* rgb_data = (unsigned char*)malloc(sizeof(unsigned char) * width * height * 3);
+					for (int i = 0; i < width * height; i++)
+					{
+						rgb_data[i*3 + 0] = color_brightness_data[i*3 + 2];  // R = B
+						rgb_data[i*3 + 1] = color_brightness_data[i*3 + 1];  // G = G
+						rgb_data[i*3 + 2] = color_brightness_data[i*3 + 0];  // B = R
+					}
+					
+					// Save image with RGB data
+					cv::Mat bright = cv::Mat(height, width, CV_8UC3, rgb_data);
 					cv::imwrite("bright.bmp", bright);
+					free(rgb_data);
+					
 					std::cout << "Get color Brightness!" << std::endl;
 				}
 				
